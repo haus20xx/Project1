@@ -33,8 +33,14 @@ export class MultiSelectComponent {
     }),
   )
 
-  public onOptionSelect(option: string) {
+  public onOptionSelect(option: string): void {
     this.activeFilterChips.add(option)
     this.select.setValue("")
+  }
+
+  public onChipRemove(target: string): void {
+    this.activeFilterChips.delete(target)
+    //Retrigger filter
+    this.select.setValue(this.select.value)
   }
 }

@@ -1,29 +1,40 @@
-import { Component } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { map, startWith } from 'rxjs';
+import { Component } from "@angular/core"
+import { FormControl } from "@angular/forms"
+import { map, startWith } from "rxjs"
 
-const BASE_OPTIONS = ['Option1', 'Option2', 'Option3']
+const BASE_OPTIONS = ["Option1", "Option2", "Option3"]
 
 @Component({
-  selector: 'app-multi-select',
-  templateUrl: './multi-select.component.html',
-  styleUrls: ['./multi-select.component.scss']
+  selector: "app-multi-select",
+  templateUrl: "./multi-select.component.html",
+  styleUrls: ["./multi-select.component.scss"],
 })
 export class MultiSelectComponent {
-  public select = new FormControl();
-  public activeFilterChips: string[] = [];
+  public select = new FormControl()
+  public activeFilterChips: Set<string> = new Set()
 
   public filteredOptions$ = this.select.valueChanges.pipe(
-    startWith(''),
-    map(v=>{
-      const FILTERED = BASE_OPTIONS; //[TODO: haus20xx]: implement filter
+    startWith(""),
+    map((value: string) => {
+      const FILTERED = BASE_OPTIONS.filter((opt) => {
+        const lower_opt = opt.toLowerCase()
+        const lower_value = value.toLowerCase()
+        const termExists = lower_opt === lower_value
+        const chipExists = [...this.activeFilterChips].find(
+          (chip) => chip.toLowerCase() === lower_opt,
+        )
+        //Only present values which are not active as chips nor the typed text
+        return !termExists && !chipExists
+      })
 
-      return v && !FILTERED.find(opt=>v===opt) ? [v, ...FILTERED]: FILTERED;
-    })
-  );
+      return value && !FILTERED.find((opt) => value === opt)
+        ? [value, ...FILTERED]
+        : FILTERED
+    }),
+  )
 
   public onOptionSelect(option: string) {
-    this.activeFilterChips.push(option);
-    this.select.setValue('');
+    this.activeFilterChips.add(option)
+    this.select.setValue("")
   }
 }
